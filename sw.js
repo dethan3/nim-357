@@ -1,4 +1,4 @@
-const CACHE_NAME = "nim-357-v3";
+const CACHE_NAME = "nim-357-v4";
 const ASSETS = [
   "./",
   "./index.html",
@@ -7,8 +7,7 @@ const ASSETS = [
   "./manifest.webmanifest",
   "./icons/icon.svg",
   "./icons/icon-180.png",
-  "./icons/icon-192.png",
-  "./icons/icon-512.png"
+  "./icons/icon-192.png"
 ];
 
 self.addEventListener("install", (event) => {
