@@ -1,0 +1,19 @@
+{
+  "name": "三五七 · Nim",
+  "short_name": "三五七",
+  "description": "适配手机、平板和桌面浏览器的三五七 Nim 取石子游戏。",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f2efe8",
+  "theme_color": "#f2efe8",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "./icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
