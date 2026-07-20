@@ -53,8 +53,7 @@ python3 -m http.server 8080
 ├── icons/
 │   ├── icon.svg
 │   ├── icon-180.png
-│   ├── icon-192.png
-│   └── icon-512.png
+│   └── icon-192.png
 ├── app.js
 ├── index.html
 ├── manifest.webmanifest
