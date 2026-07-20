@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f2efe8" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="三五七" />
+  <meta name="description" content="适配手机、平板和桌面浏览器的三五七 Nim 取石子游戏。" />
+
+  <title>三五七 · Nim</title>
+
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" href="./icons/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="./icons/icon-180.png" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body>
+  <main class="app-shell">
+    <header class="app-header">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <i></i><i></i><i></i>
+        </span>
+        <div>
+          <h1>三五七</h1>
+          <p>Nim · 最后一颗判负</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button class="ghost-button" id="rulesButton" type="button" aria-haspopup="dialog">
+          规则
+        </button>
+        <button class="ghost-button" id="newMatchButton" type="button">
+          新比赛
+        </button>
+      </div>
+    </header>
+
+    <section class="scoreboard" aria-label="比分">
+      <article class="player-card player-one is-active" id="playerCard0">
+        <div class="player-head">
+          <span class="player-token">一</span>
+          <div>
+            <p class="eyebrow">玩家一</p>
+            <strong id="score0">0</strong>
+          </div>
+        </div>
+        <span class="turn-pill" id="turnPill0">你的回合</span>
+      </article>
+
+      <div class="round-info">
+        <span>第 <strong id="roundNumber">1</strong> 局</span>
+        <span class="round-divider" aria-hidden="true"></span>
+        <span>剩余 <strong id="remainingCount">15</strong> 颗</span>
+      </div>
+
+      <article class="player-card player-two" id="playerCard1">
+        <div class="player-head">
+          <span class="player-token">二</span>
+          <div>
+            <p class="eyebrow">玩家二</p>
+            <strong id="score1">0</strong>
+          </div>
+        </div>
+        <span class="turn-pill" id="turnPill1">等待</span>
+      </article>
+    </section>
+
+    <section class="game-stage" aria-label="游戏区域">
+      <div class="stage-heading">
+        <div>
+          <p class="stage-kicker" id="turnKicker">玩家一，请选择</p>
+          <h2 id="turnHeading">从同一排取走任意颗</h2>
+        </div>
+        <button class="text-button" id="clearSelectionButton" type="button" disabled>
+          清除选择
+        </button>
+      </div>
+
+      <div class="board" id="board" aria-label="三排石子"></div>
+
+      <div class="move-panel">
+        <div class="selection-copy" aria-live="polite">
+          <span class="selection-label">本次选择</span>
+          <strong id="selectionValue">尚未选择</strong>
+          <span id="selectionHint">点按石子，或按住横向拖过多颗</span>
+        </div>
+
+        <button class="take-button" id="takeButton" type="button" disabled>
+          <span>确认取走</span>
+          <strong id="takeCount">0</strong>
+        </button>
+      </div>
+
+      <div class="history-bar">
+        <div class="last-move">
+          <span class="history-dot" aria-hidden="true"></span>
+          <span id="lastMoveText">比赛刚刚开始</span>
+        </div>
+        <button class="undo-button" id="undoButton" type="button" disabled>
+          撤回上一步
+        </button>
+      </div>
+    </section>
+
+    <footer class="app-footer">
+      <span>一次只能选择同一排</span>
+      <span>·</span>
+      <span>取到最后一颗的人输</span>
+    </footer>
+  </main>
+
+  <div class="toast" id="turnToast" role="status" aria-live="polite" hidden>
+    <span id="toastLabel">轮到玩家二</span>
+  </div>
+
+  <div class="modal-backdrop" id="resultModal" hidden>
+    <section class="modal-card result-card" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+      <div class="result-symbol" aria-hidden="true">✓</div>
+      <p class="modal-kicker">本局结束</p>
+      <h2 id="resultTitle">玩家二获胜</h2>
+      <p id="resultDescription">玩家一取走了最后一颗，因此本局判负。</p>
+
+      <div class="result-score" aria-label="当前比分">
+        <span>玩家一 <strong id="resultScore0">0</strong></span>
+        <i aria-hidden="true"></i>
+        <span>玩家二 <strong id="resultScore1">1</strong></span>
+      </div>
+
+      <div class="modal-actions">
+        <button class="secondary-button" id="resetScoresButton" type="button">
+          清空比分
+        </button>
+        <button class="primary-button" id="nextRoundButton" type="button">
+          下一局
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="rulesModal" hidden>
+    <section class="modal-card rules-card" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
+      <div class="modal-topline">
+        <div>
+          <p class="modal-kicker">玩法说明</p>
+          <h2 id="rulesTitle">三五七规则</h2>
+        </div>
+        <button class="close-button" id="closeRulesButton" type="button" aria-label="关闭规则">
+          ×
+        </button>
+      </div>
+
+      <ol class="rules-list">
+        <li>
+          <span>1</span>
+          <div>
+            <strong>选择一排</strong>
+            <p>每回合只能从同一排选择石子。</p>
+          </div>
+        </li>
+        <li>
+          <span>2</span>
+          <div>
+            <strong>任意取走</strong>
+            <p>至少取一颗，也可以把这一排一次取完。</p>
+          </div>
+        </li>
+        <li>
+          <span>3</span>
+          <div>
+            <strong>避开最后一颗</strong>
+            <p>谁取走全场最后一颗石子，谁输掉这一局。</p>
+          </div>
+        </li>
+      </ol>
+
+      <button class="primary-button full-width" id="understoodButton" type="button">
+        明白了
+      </button>
+    </section>
+  </div>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>
