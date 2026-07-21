@@ -1,0 +1,223 @@
+.player-copy {
+  min-width: 0;
+}
+
+.player-name-button {
+  max-width: 100%;
+  min-height: 28px;
+  margin: -4px -5px 1px;
+  padding: 3px 5px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.player-name-button:hover,
+.player-name-button:focus-visible {
+  background: rgba(25, 25, 23, 0.055);
+}
+
+.player-name-button .eyebrow {
+  min-width: 0;
+  max-width: 12em;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.edit-glyph {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 650;
+  opacity: 0;
+  transition: opacity 140ms ease;
+}
+
+.player-name-button:hover .edit-glyph,
+.player-name-button:focus-visible .edit-glyph {
+  opacity: 0.85;
+}
+
+.starter-choice {
+  margin: 0 0 14px;
+  text-align: left;
+}
+
+.starter-choice > p {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 680;
+  text-align: center;
+}
+
+.starter-buttons {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
+}
+
+.starter-button {
+  min-width: 0;
+  min-height: 62px;
+  padding: 10px 12px;
+  border: 1px solid var(--hairline);
+  border-radius: 15px;
+  background: var(--surface);
+  display: grid;
+  place-items: center;
+  gap: 2px;
+  cursor: pointer;
+  transition: transform 120ms ease, border-color 140ms ease, background-color 140ms ease;
+}
+
+.starter-button span {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 15px;
+  font-weight: 730;
+}
+
+.starter-button small {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.starter-button:hover,
+.starter-button:focus-visible {
+  transform: translateY(-1px);
+}
+
+.starter-one:hover,
+.starter-one:focus-visible {
+  border-color: rgba(217, 110, 63, 0.42);
+  background: var(--warm-soft);
+}
+
+.starter-two:hover,
+.starter-two:focus-visible {
+  border-color: rgba(73, 111, 120, 0.42);
+  background: var(--cool-soft);
+}
+
+.result-reset {
+  margin-top: 0;
+}
+
+.name-card {
+  width: min(100%, 480px);
+}
+
+.name-helper {
+  margin: 14px 0 20px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.name-form {
+  display: grid;
+  gap: 15px;
+}
+
+.name-form label {
+  display: grid;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 680;
+}
+
+.name-form input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 13px;
+  border: 1px solid var(--hairline-strong);
+  border-radius: 13px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px;
+  outline: none;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.name-form input:focus {
+  border-color: var(--warm);
+  box-shadow: 0 0 0 3px rgba(217, 110, 63, 0.12);
+}
+
+.reset-name-button {
+  width: max-content;
+  min-height: 34px;
+  padding: 0;
+}
+
+.name-actions {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr;
+  gap: 10px;
+  margin-top: 2px;
+}
+
+@media (hover: none) {
+  .edit-glyph {
+    opacity: 0.72;
+  }
+}
+
+@media (max-width: 640px) {
+  .player-name-button .eyebrow {
+    max-width: 7.5em;
+  }
+
+  .edit-glyph {
+    font-size: 9px;
+  }
+
+  .starter-buttons {
+    grid-template-columns: 1fr;
+  }
+
+  .starter-button {
+    min-height: 54px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    justify-items: start;
+  }
+
+  .starter-button small {
+    justify-self: end;
+  }
+}
+
+@media (max-width: 430px) {
+  .player-name-button {
+    gap: 4px;
+  }
+
+  .player-name-button .eyebrow {
+    max-width: 6em;
+  }
+
+  .name-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .edit-glyph,
+  .starter-button {
+    transition: none;
+  }
+}
