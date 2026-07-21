@@ -1,8 +1,9 @@
-const CACHE_NAME = "nim-357-v5";
+const CACHE_NAME = "nim-357-v6";
 const ASSETS = [
   "./",
   "./index.html",
   "./styles.css",
+  "./features.css",
   "./app.js",
   "./manifest.webmanifest",
   "./icons/icon.svg",
