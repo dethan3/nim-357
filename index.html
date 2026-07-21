@@ -16,6 +16,7 @@
   <link rel="icon" href="./icons/icon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="./icons/icon-180.png" />
   <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./features.css" />
 </head>
 
 <body>
@@ -45,8 +46,11 @@
       <article class="player-card player-one is-active" id="playerCard0">
         <div class="player-head">
           <span class="player-token">一</span>
-          <div>
-            <p class="eyebrow">玩家一</p>
+          <div class="player-copy">
+            <button class="player-name-button" id="playerNameButton0" type="button" aria-haspopup="dialog">
+              <span class="eyebrow" id="playerName0">玩家一</span>
+              <span class="edit-glyph" aria-hidden="true">编辑</span>
+            </button>
             <strong id="score0">0</strong>
           </div>
         </div>
@@ -62,8 +66,11 @@
       <article class="player-card player-two" id="playerCard1">
         <div class="player-head">
           <span class="player-token">二</span>
-          <div>
-            <p class="eyebrow">玩家二</p>
+          <div class="player-copy">
+            <button class="player-name-button" id="playerNameButton1" type="button" aria-haspopup="dialog">
+              <span class="eyebrow" id="playerName1">玩家二</span>
+              <span class="edit-glyph" aria-hidden="true">编辑</span>
+            </button>
             <strong id="score1">0</strong>
           </div>
         </div>
@@ -127,19 +134,66 @@
       <p id="resultDescription">玩家一取走了最后一颗，因此本局判负。</p>
 
       <div class="result-score" aria-label="当前比分">
-        <span>玩家一 <strong id="resultScore0">0</strong></span>
+        <span><span id="resultPlayerName0">玩家一</span> <strong id="resultScore0">0</strong></span>
         <i aria-hidden="true"></i>
-        <span>玩家二 <strong id="resultScore1">1</strong></span>
+        <span><span id="resultPlayerName1">玩家二</span> <strong id="resultScore1">1</strong></span>
       </div>
 
-      <div class="modal-actions">
-        <button class="secondary-button" id="resetScoresButton" type="button">
-          清空比分
-        </button>
-        <button class="primary-button" id="nextRoundButton" type="button">
-          下一局
+      <div class="starter-choice">
+        <p>下一局由谁先手？</p>
+        <div class="starter-buttons">
+          <button class="starter-button starter-one" id="nextStarterButton0" type="button">
+            <span id="nextStarterName0">玩家一</span>
+            <small>先手</small>
+          </button>
+          <button class="starter-button starter-two" id="nextStarterButton1" type="button">
+            <span id="nextStarterName1">玩家二</span>
+            <small>先手</small>
+          </button>
+        </div>
+      </div>
+
+      <button class="secondary-button full-width result-reset" id="resetScoresButton" type="button">
+        清空比分并开始新比赛
+      </button>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="nameModal" hidden>
+    <section class="modal-card name-card" role="dialog" aria-modal="true" aria-labelledby="nameModalTitle">
+      <div class="modal-topline">
+        <div>
+          <p class="modal-kicker">比赛设置</p>
+          <h2 id="nameModalTitle">编辑临时姓名</h2>
+        </div>
+        <button class="close-button" id="closeNameButton" type="button" aria-label="关闭姓名编辑">
+          ×
         </button>
       </div>
+
+      <p class="name-helper" id="nameHelper">
+        不填写时继续使用“玩家一”和“玩家二”。姓名只在本次浏览器会话中保留。
+      </p>
+
+      <form class="name-form" id="nameForm">
+        <label>
+          <span>玩家一</span>
+          <input id="playerNameInput0" type="text" maxlength="12" autocomplete="off" aria-describedby="nameHelper" />
+        </label>
+        <label>
+          <span>玩家二</span>
+          <input id="playerNameInput1" type="text" maxlength="12" autocomplete="off" aria-describedby="nameHelper" />
+        </label>
+
+        <button class="text-button reset-name-button" id="resetNamesButton" type="button">
+          恢复默认姓名
+        </button>
+
+        <div class="name-actions">
+          <button class="secondary-button" id="cancelNameButton" type="button">取消</button>
+          <button class="primary-button" type="submit">保存姓名</button>
+        </div>
+      </form>
     </section>
   </div>
 
