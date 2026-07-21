@@ -2,7 +2,8 @@
   "use strict";
 
   const INITIAL_HEAPS = [3, 5, 7];
-  const PLAYERS = ["玩家一", "玩家二"];
+  const DEFAULT_PLAYER_NAMES = ["玩家一", "玩家二"];
+  const PLAYER_NAME_STORAGE_KEY = "nim-357-player-names";
   const ROW_NAMES = ["一", "二", "三"];
 
   const $ = (selector) => document.querySelector(selector);
@@ -10,6 +11,8 @@
     appShell: $(".app-shell"),
     board: $("#board"),
     playerCards: [$("#playerCard0"), $("#playerCard1")],
+    playerNameButtons: [$("#playerNameButton0"), $("#playerNameButton1")],
+    playerNameLabels: [$("#playerName0"), $("#playerName1")],
     turnPills: [$("#turnPill0"), $("#turnPill1")],
     scores: [$("#score0"), $("#score1")],
     roundNumber: $("#roundNumber"),
@@ -31,17 +34,27 @@
     resultModal: $("#resultModal"),
     resultTitle: $("#resultTitle"),
     resultDescription: $("#resultDescription"),
+    resultPlayerNames: [$("#resultPlayerName0"), $("#resultPlayerName1")],
     resultScores: [$("#resultScore0"), $("#resultScore1")],
-    nextRoundButton: $("#nextRoundButton"),
+    nextStarterButtons: [$("#nextStarterButton0"), $("#nextStarterButton1")],
+    nextStarterNames: [$("#nextStarterName0"), $("#nextStarterName1")],
     resetScoresButton: $("#resetScoresButton"),
+    nameModal: $("#nameModal"),
+    nameForm: $("#nameForm"),
+    playerNameInputs: [$("#playerNameInput0"), $("#playerNameInput1")],
+    closeNameButton: $("#closeNameButton"),
+    cancelNameButton: $("#cancelNameButton"),
+    resetNamesButton: $("#resetNamesButton"),
     turnToast: $("#turnToast"),
     toastLabel: $("#toastLabel")
   };
 
   const state = {
     heaps: [...INITIAL_HEAPS],
+    playerNames: loadPlayerNames(),
     scores: [0, 0],
     round: 1,
+    roundStarter: 0,
     currentPlayer: 0,
     selectedRow: null,
     selectedIndices: new Set(),
@@ -50,11 +63,39 @@
     gesture: null,
     gameOver: false,
     animating: false,
-    toastTimer: null
+    toastTimer: null,
+    nameEditorTrigger: 0
   };
 
   const remainingTotal = () => state.heaps.reduce((sum, count) => sum + count, 0);
   const delay = (milliseconds) => new Promise((resolve) => window.setTimeout(resolve, milliseconds));
+  const playerName = (playerIndex) => state.playerNames[playerIndex];
+
+  function normalizePlayerName(value, playerIndex) {
+    const trimmed = String(value ?? "").trim().slice(0, 12);
+    return trimmed || DEFAULT_PLAYER_NAMES[playerIndex];
+  }
+
+  function loadPlayerNames() {
+    try {
+      const saved = JSON.parse(sessionStorage.getItem(PLAYER_NAME_STORAGE_KEY));
+      if (!Array.isArray(saved) || saved.length !== 2) {
+        return [...DEFAULT_PLAYER_NAMES];
+      }
+
+      return saved.map((name, playerIndex) => normalizePlayerName(name, playerIndex));
+    } catch {
+      return [...DEFAULT_PLAYER_NAMES];
+    }
+  }
+
+  function savePlayerNames() {
+    try {
+      sessionStorage.setItem(PLAYER_NAME_STORAGE_KEY, JSON.stringify(state.playerNames));
+    } catch {
+      // Storage can be unavailable in private or restricted browsing contexts.
+    }
+  }
 
   function vibrate(pattern = 10) {
     navigator.vibrate?.(pattern);
@@ -122,13 +163,18 @@
     elements.playerCards.forEach((card, playerIndex) => {
       const active = playerIndex === state.currentPlayer;
       card.classList.toggle("is-active", active);
+      elements.playerNameLabels[playerIndex].textContent = playerName(playerIndex);
+      elements.playerNameButtons[playerIndex].setAttribute(
+        "aria-label",
+        `编辑${playerName(playerIndex)}的姓名`
+      );
       elements.turnPills[playerIndex].textContent = active ? "你的回合" : "等待";
       elements.scores[playerIndex].textContent = String(state.scores[playerIndex]);
     });
 
     elements.roundNumber.textContent = String(state.round);
     elements.remainingCount.textContent = String(remainingTotal());
-    elements.turnKicker.textContent = `${PLAYERS[state.currentPlayer]}，请选择`;
+    elements.turnKicker.textContent = `${playerName(state.currentPlayer)}，请选择`;
     elements.turnHeading.textContent = "从同一排取走任意颗";
   }
 
@@ -154,7 +200,7 @@
 
   function renderHistory() {
     elements.lastMoveText.textContent = state.lastMove
-      ? `${PLAYERS[state.lastMove.player]}从第 ${ROW_NAMES[state.lastMove.row]} 排取走 ${state.lastMove.amount} 颗`
+      ? `${playerName(state.lastMove.player)}从第 ${ROW_NAMES[state.lastMove.row]} 排取走 ${state.lastMove.amount} 颗`
       : "比赛刚刚开始";
 
     elements.undoButton.disabled = state.history.length === 0 || state.gameOver || state.animating;
@@ -297,7 +343,7 @@
 
   function showTurnToast() {
     window.clearTimeout(state.toastTimer);
-    elements.toastLabel.textContent = `轮到${PLAYERS[state.currentPlayer]}`;
+    elements.toastLabel.textContent = `轮到${playerName(state.currentPlayer)}`;
     elements.turnToast.hidden = false;
     state.toastTimer = window.setTimeout(() => {
       elements.turnToast.hidden = true;
@@ -305,12 +351,17 @@
   }
 
   function showResult(winner, loser) {
-    elements.resultTitle.textContent = `${PLAYERS[winner]}获胜`;
-    elements.resultDescription.textContent = `${PLAYERS[loser]}取走了全场最后一颗石子，因此本局判负。`;
+    elements.resultTitle.textContent = `${playerName(winner)}获胜`;
+    elements.resultDescription.textContent = `${playerName(loser)}取走了全场最后一颗石子，因此本局判负。`;
+
     elements.resultScores.forEach((score, playerIndex) => {
+      elements.resultPlayerNames[playerIndex].textContent = playerName(playerIndex);
       score.textContent = String(state.scores[playerIndex]);
+      elements.nextStarterNames[playerIndex].textContent = playerName(playerIndex);
     });
+
     elements.resultModal.hidden = false;
+    elements.nextStarterButtons[0].focus();
   }
 
   function resetRoundState() {
@@ -324,10 +375,13 @@
     state.animating = false;
   }
 
-  function startNextRound() {
+  function startNextRound(starter) {
+    if (starter !== 0 && starter !== 1) return;
+
     elements.resultModal.hidden = true;
     state.round += 1;
-    state.currentPlayer = state.round % 2 === 1 ? 0 : 1;
+    state.roundStarter = starter;
+    state.currentPlayer = starter;
     resetRoundState();
     render();
     showTurnToast();
@@ -337,6 +391,7 @@
     elements.resultModal.hidden = true;
     state.scores = [0, 0];
     state.round = 1;
+    state.roundStarter = 0;
     state.currentPlayer = 0;
     resetRoundState();
     render();
@@ -351,6 +406,40 @@
   function closeRules() {
     elements.rulesModal.hidden = true;
     elements.rulesButton.focus();
+  }
+
+  function openNameEditor(playerIndex = 0) {
+    state.nameEditorTrigger = playerIndex;
+    elements.playerNameInputs.forEach((input, index) => {
+      input.value = playerName(index);
+    });
+    elements.nameModal.hidden = false;
+    elements.playerNameInputs[playerIndex].focus();
+    elements.playerNameInputs[playerIndex].select();
+  }
+
+  function closeNameEditor() {
+    elements.nameModal.hidden = true;
+    elements.playerNameButtons[state.nameEditorTrigger].focus();
+  }
+
+  function updatePlayerNames() {
+    state.playerNames = elements.playerNameInputs.map((input, playerIndex) => (
+      normalizePlayerName(input.value, playerIndex)
+    ));
+    savePlayerNames();
+    render();
+    closeNameEditor();
+  }
+
+  function resetPlayerNames() {
+    state.playerNames = [...DEFAULT_PLAYER_NAMES];
+    savePlayerNames();
+    elements.playerNameInputs.forEach((input, playerIndex) => {
+      input.value = state.playerNames[playerIndex];
+    });
+    render();
+    elements.playerNameInputs[0].focus();
   }
 
   elements.board.addEventListener("pointerdown", onPointerDown);
@@ -378,19 +467,36 @@
   });
   elements.undoButton.addEventListener("click", undoLastMove);
   elements.newMatchButton.addEventListener("click", startNewMatch);
-  elements.nextRoundButton.addEventListener("click", startNextRound);
+  elements.nextStarterButtons.forEach((button, playerIndex) => {
+    button.addEventListener("click", () => startNextRound(playerIndex));
+  });
   elements.resetScoresButton.addEventListener("click", startNewMatch);
   elements.rulesButton.addEventListener("click", openRules);
   elements.closeRulesButton.addEventListener("click", closeRules);
   elements.understoodButton.addEventListener("click", closeRules);
+  elements.playerNameButtons.forEach((button, playerIndex) => {
+    button.addEventListener("click", () => openNameEditor(playerIndex));
+  });
+  elements.closeNameButton.addEventListener("click", closeNameEditor);
+  elements.cancelNameButton.addEventListener("click", closeNameEditor);
+  elements.resetNamesButton.addEventListener("click", resetPlayerNames);
+  elements.nameForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    updatePlayerNames();
+  });
 
   elements.rulesModal.addEventListener("click", (event) => {
     if (event.target === elements.rulesModal) closeRules();
   });
 
+  elements.nameModal.addEventListener("click", (event) => {
+    if (event.target === elements.nameModal) closeNameEditor();
+  });
+
   window.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
-      if (!elements.rulesModal.hidden) closeRules();
+      if (!elements.nameModal.hidden) closeNameEditor();
+      else if (!elements.rulesModal.hidden) closeRules();
       else if (state.selectedIndices.size > 0) clearSelection();
     }
 
@@ -398,7 +504,8 @@
       event.key === "Enter" &&
       !elements.takeButton.disabled &&
       elements.resultModal.hidden &&
-      elements.rulesModal.hidden
+      elements.rulesModal.hidden &&
+      elements.nameModal.hidden
     ) {
       takeSelectedStones();
     }
